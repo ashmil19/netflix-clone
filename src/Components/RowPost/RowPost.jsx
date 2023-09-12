@@ -4,10 +4,12 @@ import toast, {Toaster} from 'react-hot-toast'
 import {API_KEY, IMAGE_URL} from '../../constants/constants'
 import './RowPost.css'
 import axios from  '../../axios'
+
 function RowPost(props) {
     const [movies, setMovies] = useState([]);
     const [urlId, setUrlId] = useState('');
     const [prevToastId, setPrevToastId] = useState(null);
+    const [popup, setPopup] = useState(false);
 
     useEffect(() => {
         axios.get(props.url)
@@ -23,7 +25,6 @@ function RowPost(props) {
         height: '390',
         width: '100%',
         playerVars: {
-          // https://developers.google.com/youtube/player_parameters
           autoplay: 1,
         },
     };
@@ -45,11 +46,16 @@ function RowPost(props) {
             console.log(response.data);
             if(response.data.results.length !== 0){
                 setUrlId(response.data.results[0]);
+                setPopup(true)
             } else{
                 showToast();
             }
         })
     }
+
+    const closeVideo = ()=>{
+        setPopup(false)
+    } 
 
   return (
     <div className='row'>
@@ -59,7 +65,13 @@ function RowPost(props) {
                 return <img key={movie.id} onClick={()=> handleMovie(movie.id)} className={props.isSmall ? 'smallPoster' :'poster'} src={`${IMAGE_URL+movie.backdrop_path}`} alt="poster" />
             })}
         </div>
-        {urlId && <Youtube videoId={urlId.key} opts={opts} />}
+        {popup && <div className="video-popup">
+            <div className="video-content">
+                <div className="cls-btn" onClick={closeVideo}>X</div>
+                <Youtube videoId={urlId.key} opts={opts} />
+                <h2 className='video-title'>{urlId.name}</h2>
+            </div>
+        </div>}
         
         <Toaster />
     </div>
